@@ -364,6 +364,18 @@
     border-color:var(--rose);
     box-shadow:0 0 0 4px rgba(224,80,122,.12);
   }
+  .own-box input.wrong-name {
+    border-color:#b3364e;
+    background:rgba(179,54,78,.06);
+    animation:shakeX .45s ease;
+  }
+  .name-hint {
+    margin-top:8px;
+    font-size:14px;
+    font-style:italic;
+    color:#b3364e;
+    animation:shakeX .2s ease;
+  }
 
   /* ---------- Großer Weiter-Button ---------- */
   .big-btn {
@@ -905,6 +917,7 @@
     <div class="own-box name-box">
       <label for="name-input">Wie heißt du, meine Liebste?</label>
       <input id="name-input" type="text" maxlength="40" placeholder="Dein schöner Name…" autocomplete="name">
+      <div id="name-hint" class="name-hint" hidden></div>
     </div>
 
     <button id="to-activities" class="big-btn" disabled>Weiter ➜</button>
@@ -1495,9 +1508,25 @@ function renderCalendar(){
 
 const TIMES = ['10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
 const nameInput = $('name-input');
+const nameHint = $('name-hint');
+/* Nur wer diesen Namen eintippt, darf ein Date auswählen.
+   Groß-/Kleinschreibung und Leerzeichen sind egal. */
+const REQUIRED_NAME = (PASSCODE_NAME || '').trim().toLowerCase();
 
 nameInput.addEventListener('input', () => {
-  state.name = nameInput.value.trim();
+  const typed = nameInput.value.trim();
+  if (!REQUIRED_NAME || typed.toLowerCase() === REQUIRED_NAME){
+    /* Richtig (oder keine Prüfung aktiv) */
+    state.name = typed;
+    nameInput.classList.remove('wrong-name');
+    nameHint.hidden = true;
+  } else {
+    /* Falscher Name → kein Date möglich */
+    state.name = '';
+    nameInput.classList.add('wrong-name');
+    nameHint.textContent = 'Nur eine Person darf diesen Brief bekommen… 😉';
+    nameHint.hidden = false;
+  }
   updateCalContinue();
 });
 
@@ -1529,7 +1558,7 @@ function updateCalContinue(){
   $('to-activities').disabled = !(state.day && state.time && state.name);
 }
 $('to-activities').addEventListener('click', () => {
-  if (!state.day || !state.time) return;
+  if (!state.day || !state.time || !state.name) return;
   showView('view-activities');
 });
 
