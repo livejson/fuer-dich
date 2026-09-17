@@ -1374,10 +1374,18 @@ function fleeFrom(px, py){
   dodges++;
 
   if (!dodging){
+    /* Platzhalter in der Reihe: Ohne ihn rutscht der Ja-Button nach vorne,
+       sobald der Nein-Button in den Body verschoben wird – am Handy landet
+       der Klick des Browsers dann ausgerechnet auf „Ja“! */
+    const r = btnNo.getBoundingClientRect();
+    const ph = document.createElement('span');
+    ph.style.display = 'inline-block';
+    ph.style.width = r.width + 'px';
+    ph.style.height = r.height + 'px';
+    btnNo.replaceWith(ph);
     // In den Body verschieben: Die Karte hat backdrop-filter und würde
     // sonst als Koordinatenbezug für position:fixed dienen!
     document.body.appendChild(btnNo);
-    const r = btnNo.getBoundingClientRect();
     btnNo.dataset.x = r.left;
     btnNo.dataset.y = r.top;
     btnNo.style.width = r.width + 'px';
@@ -1452,10 +1460,23 @@ document.addEventListener('pointermove', (e) => {
 }, { passive:true });
 
 /* Touch & Klick: auf Tap hin weggleiten */
-btnNo.addEventListener('pointerdown', (e) => fleeFrom(e.clientX, e.clientY));
-btnNo.addEventListener('click',      (e) => fleeFrom(e.clientX, e.clientY));
+/* Phantom-Klick-Schutz (besonders am Handy): Nach einem Tap auf „Nein" flieht der
+   Button, das Layout rutscht nach – und der Click des Browsers landet sonst auf dem
+   Ja-Button, der jetzt unter dem Finger steht. Kurze Zeit lang nehmen wir Ja-Klicks
+   nicht an, die unmittelbar nach einer Nein-Flucht ankommen. */
+let lastFleeTap = 0;
+btnNo.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  lastFleeTap = Date.now();
+  fleeFrom(e.clientX, e.clientY);
+});
+btnNo.addEventListener('click', (e) => {
+  lastFleeTap = Date.now();
+  fleeFrom(e.clientX, e.clientY);
+});
 
 btnYes.addEventListener('click', () => {
+  if (Date.now() - lastFleeTap < 500) return; /* Phantom-Klick nach Nein-Tap ignorieren */
   btnYes.style.transform = '';
   const br = btnYes.getBoundingClientRect();
   heartSpray(br.left + br.width/2, br.top + br.height/2);
