@@ -487,6 +487,42 @@
   }
   @keyframes hintBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
+  /* ---------- Passcode ---------- */
+  .passcode-input {
+    width:100%;
+    font-family:inherit;
+    font-size:20px;
+    text-align:center;
+    letter-spacing:.35em;
+    padding:14px 16px;
+    border-radius:10px;
+    border:1px solid rgba(212,175,122,.5);
+    background:rgba(255,255,255,.7);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .passcode-input::placeholder { color:#c4a8b4; letter-spacing:.12em; font-size:16px; }
+  .passcode-input:focus {
+    border-color:var(--rose);
+    box-shadow:0 0 0 4px rgba(224,80,122,.12);
+  }
+  .passcode-input.shake { animation:shakeX .45s ease; }
+  @keyframes shakeX {
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-9px); }
+    40%{ transform:translateX(8px); }
+    60%{ transform:translateX(-6px); }
+    80%{ transform:translateX(4px); }
+  }
+  .passcode-error {
+    min-height:22px;
+    margin-top:12px;
+    font-style:italic;
+    font-size:15.5px;
+    color:var(--rose-deep);
+  }
+
   /* ---------- Rubbellos-Siegel ---------- */
   .seal-under {
     position:absolute;
@@ -790,8 +826,21 @@
 
 <div class="card" id="main-card">
 
+  <!-- ================= VIEW -1 : Passcode ================= -->
+  <section id="view-passcode" class="view active">
+    <div class="ornament">✦ Streng geheim ✦</div>
+    <span class="glow-heart">🔒</span>
+    <h1>Nur für wen dieser Brief bestimmt ist…</h1>
+    <p class="sub">Gib das geheime Wort ein, um den Brief zu öffnen.</p>
+
+    <input id="passcode-input" class="passcode-input" type="text" maxlength="30"
+           placeholder="geheimes Wort…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div id="passcode-error" class="passcode-error"></div>
+    <button id="passcode-btn" class="big-btn" style="margin-top:6px;">Brief entsiegeln 🔓</button>
+  </section>
+
   <!-- ================= VIEW 0 : Umschlag ================= -->
-  <section id="view-envelope" class="view active">
+  <section id="view-envelope" class="view">
     <div class="envelope-scene">
       <div class="envelope" id="envelope">
         <div class="env-back"></div>
@@ -940,6 +989,13 @@ const DATE_VENUE = {
   mapsUrl: ''     // z. B. 'https://maps.google.com/?q=Cafe+Central+Bonn'
 };
 
+/* Passcode — wer dieses geheime Wort kennt, darf den Brief öffnen.
+   GROSS-/Kleinschreibung und Leerzeichen am Anfang/Ende sind egal. */
+const PASSCODE = 'pia';
+/* Ist der Code richtig, wird dieser Name automatisch eingesetzt.
+   Leer lassen ('') = sie tippt ihren Namen selbst ein. */
+const PASSCODE_NAME = 'Pia';
+
 async function sendTelegram(text){
   if (!TELEGRAM.BOT_TOKEN || !TELEGRAM.CHAT_ID){
     console.warn('[Telegram] Noch nicht eingerichtet.');
@@ -977,6 +1033,47 @@ function showView(id){
 document.querySelectorAll('[data-goto]').forEach(b =>
   b.addEventListener('click', () => showView(b.dataset.goto))
 );
+
+/* =====================================================
+   VIEW -1 – Passcode-Schleuse
+===================================================== */
+const passInput = $('passcode-input');
+const passError = $('passcode-error');
+let passAttempts = 0;
+
+function tryPasscode(){
+  const val = passInput.value.trim().toLowerCase();
+  if (val === PASSCODE){
+    passError.textContent = '';
+    if (PASSCODE_NAME){
+      state.name = PASSCODE_NAME;       // Kalender-Weiter-Button ist damit sofort aktiv
+      const ni = $('name-input');
+      if (ni) ni.value = PASSCODE_NAME;
+    }
+    burstFireworks(1);
+    showView('view-envelope');
+    sendTelegram('🔓 <b>Der Passcode wurde richtig erraten.</b> Sie liest jetzt den Brief… 🤫');
+  } else {
+    passAttempts++;
+    passInput.classList.remove('shake');
+    void passInput.offsetWidth;          // Animation neu starten
+    passInput.classList.add('shake');
+    const teasing = [
+      'Nicht ganz… versuch es nochmal. 💭',
+      'Hmpf. Falsches Wort. Tipp: Es ist ein sehr schöner Name. 😉',
+      'Immer noch nicht… du schaffst das!',
+      'Das Universum flüstert: Genaue Schreibweise zählt.'
+    ];
+    passError.textContent = teasing[Math.min(passAttempts - 1, teasing.length - 1)];
+    passInput.select();
+    if (passAttempts === 2){
+      sendTelegram('🕵️ <b>Jemand rätselt gerade am Passcode…</b> (2. Fehlversuch)');
+    }
+  }
+}
+$('passcode-btn').addEventListener('click', tryPasscode);
+passInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryPasscode(); });
+setTimeout(() => { try { passInput.focus(); } catch(e){} }, 400);
 
 /* =====================================================
    Sternenhimmel
