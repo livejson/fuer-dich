@@ -765,6 +765,79 @@
      MOBILE-ANPASSUNGEN — bewusst am Ende des Stylesheets,
      damit sie die Basisregeln zuverlässig überschreiben.
   ====================================================== */
+  /* ---------- Story: Brief-Intro ---------- */
+  .intro-box {
+    background:linear-gradient(160deg,#fffdf8,#fdf3e3);
+    border:1px solid rgba(212,175,122,.5);
+    border-radius:6px;
+    padding:26px 24px;
+    position:relative;
+    text-align:left;
+    box-shadow:0 14px 34px -18px rgba(110,22,56,.35);
+  }
+  .intro-box::before{ content:''; position:absolute; inset:6px; border:1px solid rgba(212,175,122,.35); border-radius:4px; pointer-events:none; }
+  .intro-salut { font-family:'Great Vibes',cursive; font-size:30px; color:var(--rose-deep); margin-bottom:10px; }
+  .intro-text { font-size:16.5px; line-height:1.65; color:var(--ink); font-style:italic; margin-bottom:10px; }
+  .intro-sign { font-family:'Great Vibes',cursive; font-size:24px; color:var(--rose-deep); text-align:right; margin-top:14px; }
+
+  /* ---------- Story: Erinnerungsbilder ---------- */
+  .mem-card {
+    background:linear-gradient(160deg,#fffdf8,#fdf3e3);
+    border:1px solid rgba(212,175,122,.5);
+    border-radius:12px;
+    padding:28px 22px;
+    min-height:150px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    box-shadow:0 14px 34px -18px rgba(110,22,56,.35);
+    animation:letterIn .45s ease;
+  }
+  .mem-card .mem-emoji { font-size:44px; }
+  .mem-card .mem-img { max-width:100%; max-height:160px; border-radius:8px; object-fit:cover; }
+  .mem-card .mem-title { font-weight:600; font-size:18px; color:var(--rose-deep); letter-spacing:.04em; }
+  .mem-card .mem-text { font-size:15.5px; font-style:italic; color:var(--ink); line-height:1.55; text-align:center; }
+
+  /* ---------- Stimmung & Treffpunkt ---------- */
+  .opts { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .opt {
+    display:flex; align-items:center; gap:10px;
+    padding:14px 12px; border-radius:12px; cursor:pointer;
+    border:1px solid rgba(212,175,122,.45); background:rgba(255,255,255,.55);
+    font-family:inherit; font-size:15px; color:var(--ink);
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .opt span { font-size:24px; }
+  .opt.sel { background:#fff; border-color:var(--rose); box-shadow:0 10px 24px -12px rgba(163,32,75,.45); transform:translateY(-2px); }
+  @media (hover:hover){ .opt:hover:not(.sel){ transform:translateY(-3px); background:rgba(224,80,122,.08); } }
+  @media (max-width:460px){ .opts{ grid-template-columns:1fr; } }
+  #surprise-btn { margin-top:12px; }
+
+  /* ---------- Finale: Besiegelungs-Zeremonie ---------- */
+  .ceremony-env {
+    position:relative; width:210px; height:140px; margin:18px auto 22px; perspective:600px;
+  }
+  .ce-body { position:absolute; inset:0; background:linear-gradient(160deg,#f3e3d3,#e6cdb4); border:1px solid rgba(212,175,122,.6); border-radius:8px; box-shadow:0 18px 40px -18px rgba(110,22,56,.5); }
+  .ce-flap { position:absolute; left:0; top:0; width:100%; height:52%; background:linear-gradient(180deg,#eed9c4,#e0c3a4); border:1px solid rgba(212,175,122,.6); border-radius:8px 8px 0 0; transform-origin:top; transition:transform .8s cubic-bezier(.6,-0.2,.3,1.3); z-index:2; }
+  .ceremony-env.open .ce-flap { transform:rotateX(178deg); }
+  .ce-seal { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%) scale(0); width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; background:radial-gradient(circle at 35% 35%, #e0507a, #a3204b); box-shadow:0 6px 16px -6px rgba(110,22,56,.7); z-index:3; }
+  .ce-seal.stamped { animation:sealStamp .55s cubic-bezier(.2,1.6,.4,1) forwards; }
+  @keyframes sealStamp {
+    0%   { transform:translate(-50%,-50%) scale(2.6); opacity:0; }
+    60%  { transform:translate(-50%,-50%) scale(.92); opacity:1; }
+    100% { transform:translate(-50%,-50%) scale(1);   opacity:1; }
+  }
+  .ceremony-env.fade { transition:opacity .6s ease, transform .6s ease; opacity:0; transform:translateY(-14px) scale(.96); }
+
+  .letter { transition:transform .8s ease, opacity .8s ease, filter .8s ease; }
+  .letter.letter-sealing { transform:perspective(900px) rotateX(38deg) scale(.88) translateY(-12px); filter:brightness(.92); }
+  .letter.ceremony-done { display:none; }
+  .big-btn.ghost {
+    background:none;
+    border:1.5px solid rgba(212,175,122,.55);
+    color:var(--gold);
+    box-shadow:none;
+  }
+  @media (hover:hover){ .big-btn.ghost:hover:not(:disabled){ background:rgba(224,80,122,.08); transform:translateY(-3px); } }
+
   @media (max-width:520px){
     .card{ padding:34px 18px 30px; border-radius:16px; }
     .card::before{ inset:7px; }
@@ -798,6 +871,16 @@
     .reason-btn{ padding:12px 20px; font-size:14.5px; }
     .env-hint{ font-size:15.5px; text-align:center; padding:0 10px; }
     .big-btn{ padding:15px; font-size:15.5px; }
+    .intro-box{ padding:20px 16px; }
+    .intro-salut{ font-size:26px; }
+    .intro-text{ font-size:15px; }
+    .intro-sign{ font-size:21px; }
+    .mem-card{ padding:20px 14px; min-height:130px; }
+    .mem-card .mem-title{ font-size:16.5px; }
+    .mem-card .mem-text{ font-size:14.5px; }
+    .opt{ padding:13px 11px; font-size:14.5px; }
+    .opt span{ font-size:22px; }
+    .ceremony-env{ width:170px; height:115px; }
   }
   @media (max-width:360px){
     .letter-key{ width:auto; }
@@ -828,6 +911,17 @@
     </div>
   </section>
 
+  <!-- ================= VIEW 0.5 : Brief-Intro (Story) ================= -->
+  <section id="view-intro" class="view">
+    <div class="intro-box">
+      <div class="intro-salut">Liebe Pia,</div>
+      <div class="intro-text">manche Gedanken trägt man lange mit sich herum. Dieser Brief hier ist einer davon. Es gibt etwas, das ich dich fragen möchte — aber bevor ich es tue, sollst du wissen, warum es gerade du bist.</div>
+      <div class="intro-text">Lies weiter. Ich verspreche, es lohnt sich.</div>
+      <div class="intro-sign">— Jason</div>
+    </div>
+    <button id="intro-continue-btn" class="big-btn">Weiter lesen 💌</button>
+  </section>
+
   <!-- ================= VIEW 1 : die Frage ================= -->
   <section id="view-question" class="view">
     <div class="ornament">✦ Eine Frage ✦</div>
@@ -853,6 +947,21 @@
     <div class="reason-nav">
       <button id="reason-next" class="reason-btn">Weiter ➜</button>
       <button id="reason-skip" class="reason-btn ghost">direkt zum Datum ➜</button>
+    </div>
+  </section>
+
+  <!-- ================= VIEW 1.6 : Erinnerungsbilder (Story) ================= -->
+  <section id="view-memories" class="view">
+    <div class="ornament">✦ Kleine Erinnerungen ✦</div>
+    <span class="glow-heart">💭</span>
+    <div class="mem-card" id="mem-card">
+      <div class="mem-emoji" id="mem-emoji">🧸</div>
+      <div class="mem-title" id="mem-title">Erinnerung 1 von 3</div>
+      <div class="mem-text" id="mem-text"></div>
+    </div>
+    <div class="reason-nav" style="margin-top:22px;">
+      <button id="mem-next-btn" class="reason-btn">Weiter ➜</button>
+      <button id="mem-skip-btn" class="reason-btn ghost">direkt zum Datum ➜</button>
     </div>
   </section>
 
@@ -902,15 +1011,57 @@
       <input id="own-input" type="text" maxlength="80" placeholder="z. B. Sterne zählen auf dem Dach…">
     </div>
 
-    <button id="to-final" class="big-btn" disabled>Versprechen besiegeln 💘</button>
+    <button id="to-mood" class="big-btn" disabled>Weiter: Wie soll unser Abend sein? ✨</button>
     <button class="back-link" data-goto="view-calendar">← zurück</button>
+  </section>
+
+  <!-- ================= VIEW 3.5 : Stimmung (Story) ================= -->
+  <section id="view-mood" class="view">
+    <div class="ornament">✦ Zwischen uns ✦</div>
+    <span class="glow-heart">🌙</span>
+    <h1>Wie soll unser Abend sein?</h1>
+    <p class="sub">Wähle die Stimmung — den Rest übernehmen wir beide.</p>
+
+    <div class="opts" id="mood-opts">
+      <button class="opt" data-mood="🌙 Romantisch"><span>🌙</span> Romantisch</button>
+      <button class="opt" data-mood="😂 Lustig"><span>😂</span> Lustig</button>
+      <button class="opt" data-mood="__surprise__"><span>✨</span> Überrasch mich</button>
+      <button class="opt" data-mood="🖤 Einfach nur wir zwei"><span>🖤</span> Einfach nur wir zwei</button>
+    </div>
+
+    <button id="surprise-btn" class="big-btn ghost" style="display:none;">🎲 Überraschung — entscheide für mich</button>
+    <button id="to-place" class="big-btn" disabled>Weiter: Der Treffpunkt 📍</button>
+    <button class="back-link" data-goto="view-activities">← zurück</button>
+  </section>
+
+  <!-- ================= VIEW 3.7 : Treffpunkt (Story) ================= -->
+  <section id="view-place" class="view">
+    <div class="ornament">✦ Der Ort ✦</div>
+    <span class="glow-heart">📍</span>
+    <h1>Wo soll unser erstes Date beginnen?</h1>
+    <p class="sub">Sag mir, wo ich auf dich warten darf.</p>
+
+    <div class="opts" id="place-opts">
+      <button class="opt" data-place="Ich hole dich ab 🚗"><span>🚗</span> Ich hole dich ab</button>
+      <button class="opt" data-place="Wir treffen uns dort 🗺️"><span>🗺️</span> Wir treffen uns dort</button>
+      <button class="opt" data-place="Überrasche mich 🎁"><span>🎁</span> Überrasche mich</button>
+      <button class="opt" data-place="__custom__"><span>✏️</span> Eigener Ort</button>
+    </div>
+
+    <div class="own-box" id="custom-place-box" style="display:none;">
+      <label for="custom-place-input">Dein eigener Ort</label>
+      <input id="custom-place-input" type="text" maxlength="80" placeholder="z. B. am Brunnen im Stadtpark…">
+    </div>
+
+    <button id="to-final" class="big-btn" disabled>Versprechen besiegeln 💘</button>
+    <button class="back-link" data-goto="view-mood">← zurück</button>
   </section>
 
   <!-- ================= VIEW 4 : Finale ================= -->
   <section id="view-final" class="view">
     <div class="ornament">✦ Besiegelt ✦</div>
     <span class="glow-heart final-emoji">💌</span>
-    <h1>Es ist ein Versprechen.</h1>
+    <h1>Dann ist es also ein Date. ❤️</h1>
 
     <div class="letter">
       <div class="letter-salut" id="final-salut">Meine Liebste,</div>
@@ -926,6 +1077,14 @@
         <div class="letter-key">Wir tun</div>
         <div class="letter-val accent" id="final-what"></div>
       </div>
+      <div class="letter-row" id="row-mood" style="display:none">
+        <div class="letter-key">Stimmung</div>
+        <div class="letter-val accent" id="final-mood"></div>
+      </div>
+      <div class="letter-row" id="row-place" style="display:none">
+        <div class="letter-key">Treffpunkt</div>
+        <div class="letter-val accent" id="final-place"></div>
+      </div>
       <div class="letter-row" id="row-venue" style="display:none">
         <div class="letter-key">Ort</div>
         <div class="letter-val accent" id="final-venue"></div>
@@ -940,8 +1099,15 @@
     </div>
     <div id="save-status" class="save-status"></div>
 
-    <p class="best-line">Du hast gerade <span class="script">die beste Entscheidung</span> deines Lebens getroffen! 💖</p>
-    <p class="footer-note">Ich freue mich schon auf diesen Moment. Bis bald! 😍</p>
+    <div class="ceremony-env" id="ceremony-env">
+      <div class="ce-body"></div>
+      <div class="ce-flap"></div>
+      <div class="ce-seal">🌹</div>
+    </div>
+    <button id="ceremony-btn" class="big-btn">Brief besiegeln 🌹</button>
+
+    <p class="best-line" id="best-line" style="display:none">Ich weiß nicht, wohin dieser Abend uns führt. Aber ich weiß, dass ich mich darauf freue, ihn mit dir zu verbringen. <span class="script">Bis bald. 💘</span></p>
+    <p class="footer-note" id="footer-note" style="display:none">Und danke, dass du Ja gesagt hast. 😍</p>
   </section>
 
 </div>
@@ -988,7 +1154,7 @@ async function sendTelegram(text){
 /* =====================================================
    State & Helfer
 ===================================================== */
-const state = { day:null, time:null, activity:null, name:'' };
+const state = { day:null, time:null, activity:null, name:'', mood:null, place:null, surprised:false };
 const $ = id => document.getElementById(id);
 
 function showView(id){
@@ -1109,7 +1275,7 @@ envelope.addEventListener('click', (e) => {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   cv.width = SIZE * dpr;
   cv.height = SIZE * dpr;
-  const ctx = cv.getContext('2d');
+  const ctx = cv.getContext('2d', { willReadFrequently:true });
   if (!ctx) return;
   ctx.scale(dpr, dpr);
 
@@ -1294,9 +1460,16 @@ btnYes.addEventListener('click', () => {
   const br = btnYes.getBoundingClientRect();
   heartSpray(br.left + br.width/2, br.top + br.height/2);
   burstFireworks(2);
+  sendTelegram('🌹 <b>Jemand hat gerade JA gedrückt!</b>\n Und jetzt wird ein Date ausgewählt… 😍');
+  showView('view-intro');
+});
+
+/* =====================================================
+   STORY – Brief-Intro
+===================================================== */
+$('intro-continue-btn').addEventListener('click', () => {
   showView('view-reasons');
   initReasons();
-  sendTelegram('🌹 <b>Jemand hat gerade JA gedrückt!</b>\n Und jetzt wird ein Date ausgewählt… 😍');
 });
 
 /* =====================================================
@@ -1339,10 +1512,42 @@ $('reason-next').addEventListener('click', () => {
     reasonsPingSent = true;
     sendTelegram('💌 <b>Sie hat alle 5 Gründe gelesen!</b> Jemand sitzt gerade ganz still da und denkt nach… 😌');
   }
+  showView('view-memories');
+  initMemories();
+});
+$('reason-skip').addEventListener('click', () => {
+  showView('view-memories');
+  initMemories();
+});
+
+/* =====================================================
+   STORY – Erinnerungsbilder
+===================================================== */
+const MEMORIES = [
+  { emoji:'🧸', text:'An das erste Mal, dass wir gelacht haben, bis uns der Bauch weh tat. Ich glaube, in diesem Moment habe ich zum ersten Mal gedacht: bei ihr fühle ich mich zuhause.' },
+  { emoji:'🌦️', text:'An den Tag, an dem alles dumm lief — Regen, Stress, Chaos. Und es war trotzdem schön, weil du einfach da warst.' },
+  { emoji:'🌙', text:'An all die Abende, an denen ich an dich gedacht habe und mir dachte: mit ihr würde selbst ein ganz normaler Dienstag zu etwas Besonderem.' }
+];
+let memIdx = 0;
+
+function initMemories(){ memIdx = 0; renderMemory(); }
+function renderMemory(){
+  const m = MEMORIES[memIdx];
+  $('mem-emoji').textContent = m.emoji;
+  $('mem-title').textContent = 'Erinnerung ' + (memIdx + 1) + ' von ' + MEMORIES.length;
+  $('mem-text').textContent = m.text;
+  $('mem-next-btn').textContent = (memIdx === MEMORIES.length - 1) ? 'Jetzt zum Datum ➜' : 'Weiter ➜';
+  const card = $('mem-card');
+  card.style.animation = 'none';
+  void card.offsetWidth; /* Reflow, damit die Animation neu startet */
+  card.style.animation = '';
+}
+$('mem-next-btn').addEventListener('click', () => {
+  if (memIdx < MEMORIES.length - 1){ memIdx++; renderMemory(); return; }
   showView('view-calendar');
   renderCalendar();
 });
-$('reason-skip').addEventListener('click', () => {
+$('mem-skip-btn').addEventListener('click', () => {
   showView('view-calendar');
   renderCalendar();
 });
@@ -1482,8 +1687,62 @@ const actBtns = document.querySelectorAll('.act');
 const ownInput = $('own-input');
 
 function updateActContinue(){
-  $('to-final').disabled = !state.activity;
+  $('to-mood').disabled = !state.activity;
 }
+
+/* =====================================================
+   VIEW 3.5 – Stimmung (+ Überrasch-Roulette)
+===================================================== */
+$('to-mood').addEventListener('click', () => {
+  if (!state.activity) return;
+  showView('view-mood');
+});
+
+function updateMoodContinue(){
+  const toPlace = $('to-place');
+  if (state.mood === 'surprise-roulette'){
+    toPlace.disabled = false;
+    toPlace.textContent = 'Weiter: Der Treffpunkt 📍';
+    return;
+  }
+  toPlace.disabled = !state.mood;
+}
+document.querySelectorAll('#mood-opts .opt').forEach(b => b.addEventListener('click', () => {
+  const pick = b.dataset.mood;
+  state.mood = (pick === '__surprise__') ? null : pick;
+  state.surprised = false;
+  document.querySelectorAll('#mood-opts .opt').forEach(x => x.classList.toggle('sel', x === b));
+  $('surprise-btn').style.display = (pick === '__surprise__') ? '' : 'none';
+  if (pick === '__surprise__'){
+    $('surprise-btn').textContent = '🎲 Überraschung – entscheide für mich';
+    $('surprise-btn').disabled = false;
+    updateMoodContinue(); /* Button zu, bis Roulette läuft */
+    return;
+  }
+  updateMoodContinue();
+}));
+
+const MOOD_ROULETTE = ['🌙 Romantisch','😂 Lustig','🖤 Einfach nur wir zwei'];
+$('surprise-btn').addEventListener('click', () => {
+  $('surprise-btn').disabled = true;
+  $('surprise-btn').textContent = '🎲🎲🎲';
+  let n = 0;
+  const iv = setInterval(() => {
+    $('surprise-btn').textContent = '🎲 ' + MOOD_ROULETTE[Math.floor(Math.random()*MOOD_ROULETTE.length)];
+    if (++n >= 10){
+      clearInterval(iv);
+      const pick = MOOD_ROULETTE[Math.floor(Math.random()*MOOD_ROULETTE.length)];
+      state.mood = pick;
+      state.surprised = true;
+      $('surprise-btn').textContent = '✨ ' + pick + ' — das Schicksal hat entschieden!';
+      updateMoodContinue();
+    }
+  }, 120);
+});
+$('to-place').addEventListener('click', () => {
+  if (!state.mood) return;
+  showView('view-place');
+});
 actBtns.forEach(b => b.addEventListener('click', () => {
   state.activity = b.dataset.act;
   ownInput.value = '';
@@ -1500,8 +1759,32 @@ ownInput.addEventListener('input', () => {
   updateActContinue();
 });
 
+/* =====================================================
+   VIEW 3.7 – Treffpunkt
+===================================================== */
+function updatePlaceContinue(){
+  $('to-final').disabled = !(state.activity && state.mood && state.place);
+}
+document.querySelectorAll('#place-opts .opt').forEach(b => b.addEventListener('click', () => {
+  const pick = b.dataset.place;
+  document.querySelectorAll('#place-opts .opt').forEach(x => x.classList.toggle('sel', x === b));
+  if (pick === '__custom__'){
+    $('custom-place-box').style.display = '';
+    state.place = $('custom-place-input').value.trim() || null;
+  } else {
+    $('custom-place-box').style.display = 'none';
+    state.place = pick;
+  }
+  updatePlaceContinue();
+}));
+$('custom-place-input').addEventListener('input', () => {
+  const v = $('custom-place-input').value.trim();
+  state.place = v || null;
+  updatePlaceContinue();
+});
+
 $('to-final').addEventListener('click', () => {
-  if (!state.activity) return;
+  if (!state.activity || !state.mood || !state.place) return;
   const dateStr = state.day.toLocaleDateString('de-DE',
     { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   const name = state.name || 'Liebste';
@@ -1509,6 +1792,10 @@ $('to-final').addEventListener('click', () => {
   $('final-when').textContent = dateStr;
   $('final-hour').textContent = state.time + ' Uhr';
   $('final-what').textContent = state.activity;
+  $('row-mood').style.display = '';
+  $('final-mood').textContent = state.mood;
+  $('row-place').style.display = '';
+  $('final-place').textContent = state.place;
   $('row-venue').style.display = DATE_VENUE.name ? '' : 'none';
   $('final-venue').textContent = DATE_VENUE.name || '';
   showView('view-final');
@@ -1520,9 +1807,43 @@ $('to-final').addEventListener('click', () => {
     '📅 ' + dateStr + '\n' +
     '🕐 ' + state.time + ' Uhr\n' +
     '✨ ' + state.activity + '\n' +
-    (DATE_VENUE.name ? '📍 ' + DATE_VENUE.name + '\n' : '') +
-    '\nDas Date ist offiziell! 🥳'
+    '🌙 ' + state.mood + '\n' +
+    '📍 ' + state.place +
+    (DATE_VENUE.name ? '\n🏠 ' + DATE_VENUE.name : '') + '\n\n' +
+    'Das Date ist offiziell! 🥳'
   );
+});
+
+/* =====================================================
+   Finale Zeremonie: Brief schließt sich → Wachssiegel → Blütenregen
+===================================================== */
+$('ceremony-btn').addEventListener('click', () => {
+  const letter = document.querySelector('#view-final .letter');
+  const btn = $('ceremony-btn');
+  if (letter.classList.contains('ceremony-done') || letter.classList.contains('letter-sealing')) return;
+  letter.classList.add('letter-sealing');
+  btn.disabled = true;
+  btn.textContent = 'Siegel wird gesetzt… 🌹';
+  burstFireworks(1);
+  setTimeout(() => {
+    letter.classList.add('ceremony-done');
+    $('ceremony-env').classList.add('open');
+    setTimeout(() => {
+      const seal = document.querySelector('#ceremony-env .ce-seal');
+      seal.classList.add('stamped');
+      burstFireworks(1);
+      setTimeout(() => {
+        startConfetti();
+        $('ceremony-env').classList.add('fade');
+        btn.style.display = 'none';
+        $('save-img').style.display = '';
+        $('save-cal').style.display = '';
+        $('best-line').style.display = '';
+        $('footer-note').style.display = '';
+        $('save-status').style.display = '';
+      }, 800);
+    }, 850);
+  }, 800);
 });
 
 /* =====================================================
@@ -1673,8 +1994,12 @@ function saveToCalendar(){
       'DTSTART:' + fmt(start),
       'DTEND:' + fmt(end),
       'SUMMARY:' + esc('Date mit Jason 💘'),
-      'DESCRIPTION:' + esc('Wir tun: ' + (state.activity || '') + '\n\nEine Einladung, die man nicht ablehnen kann 🌹'),
-      ...(DATE_VENUE.name ? ['LOCATION:' + esc(DATE_VENUE.name)] : []),
+      'DESCRIPTION:' + esc('Wir tun: ' + (state.activity || '') + '\nStimmung: ' + (state.mood || '') + '\nTreffpunkt: ' + (state.place || '') + '\n\nEine Einladung, die man nicht ablehnen kann 🌹'),
+      'LOCATION:' + esc(
+        (state.place && state.place !== 'Ich hole dich ab 🚗' && state.place !== 'Überrasche mich 🎁')
+          ? state.place
+          : (DATE_VENUE.name || 'Noch ein Geheimnis 💫')
+      ),
       ...(DATE_VENUE.mapsUrl ? ['URL:' + DATE_VENUE.mapsUrl] : []),
       'BEGIN:VALARM',
       'TRIGGER:-PT24H',
