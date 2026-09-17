@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telegram-Bot einrichten ⚙️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --pink:#ff5c8a;
+    --pink-dark:#e63c6f;
+    --purple:#8a4fff;
+    --ink:#3d2438;
+    --muted:#8d7288;
+    --tg:#229ED9;
+    --card:rgba(255,255,255,.85);
+  }
+
+  body {
+    font-family:'Poppins', system-ui, sans-serif;
+    color:var(--ink);
+    background:linear-gradient(-45deg,#ffd3e0,#ffe8d6,#e8d9ff,#d6f5ff,#ffd3e0);
+    background-size:400% 400%;
+    animation:bgShift 18s ease infinite;
+    min-height:100vh;
+    padding:40px 16px 60px;
+  }
+  @keyframes bgShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+  .wrap { max-width:680px; margin:0 auto; }
+
+  h1 {
+    text-align:center;
+    font-size:clamp(24px,5vw,32px);
+    font-weight:800;
+    margin-bottom:6px;
+    background:linear-gradient(90deg,var(--pink-dark),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .lead { text-align:center; color:var(--muted); font-size:14px; margin-bottom:28px; }
+
+  .card {
+    background:var(--card);
+    backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:24px;
+    box-shadow:0 20px 44px -18px rgba(140,60,120,.35);
+    padding:24px 26px;
+    margin-bottom:18px;
+  }
+
+  .step-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .step-num {
+    width:34px; height:34px; flex:none;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+    color:#fff; font-weight:700; font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 14px -6px rgba(230,60,111,.7);
+  }
+  .step-head h2 { font-size:17px; font-weight:700; }
+
+  .card p { font-size:14px; line-height:1.65; margin-bottom:8px; }
+  .card a { color:var(--tg); font-weight:600; }
+
+  .pill {
+    display:inline-block;
+    background:rgba(34,158,217,.12);
+    color:var(--tg);
+    font-weight:700;
+    font-size:12.5px;
+    padding:4px 12px;
+    border-radius:999px;
+    margin:2px 0 8px;
+  }
+  code {
+    background:#f6edf3;
+    border-radius:8px;
+    padding:2px 8px;
+    font-size:13px;
+    font-family:ui-monospace, Consolas, monospace;
+    word-break:break-all;
+  }
+
+  input, textarea {
+    width:100%;
+    font-family:inherit;
+    font-size:14px;
+    padding:12px 14px;
+    border-radius:14px;
+    border:2px solid #f0e2ea;
+    outline:none;
+    background:#fff;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus, textarea:focus {
+    border-color:var(--pink);
+    box-shadow:0 0 0 4px rgba(255,92,138,.15);
+  }
+  label { display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin:12px 0 6px; text-transform:uppercase; letter-spacing:.06em; }
+
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  button {
+    font-family:inherit; cursor:pointer; border:none;
+    padding:12px 22px;
+    font-size:14px; font-weight:700;
+    border-radius:999px;
+    transition:transform .15s ease, opacity .2s ease;
+  }
+  button:hover:not(:disabled) { transform:translateY(-2px); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .btn-test { color:#fff; background:linear-gradient(135deg,#229ED9,#1a7fb0); box-shadow:0 10px 20px -8px rgba(34,158,217,.7); }
+  .btn-copy { color:#fff; background:linear-gradient(135deg,var(--pink),var(--purple)); box-shadow:0 10px 20px -8px rgba(160,70,200,.6); }
+
+  .status { margin-top:12px; font-size:13.5px; font-weight:600; min-height:20px; line-height:1.5; }
+  .status.ok { color:#1a9a54; }
+  .status.err { color:var(--pink-dark); }
+
+  pre {
+    background:#2b1e2a;
+    color:#ffe3ef;
+    border-radius:16px;
+    padding:16px 18px;
+    font-size:12.5px;
+    line-height:1.7;
+    overflow-x:auto;
+    font-family:ui-monospace, Consolas, monospace;
+    white-space:pre;
+  }
+
+  .tip { font-size:12.5px; color:var(--muted); margin-top:8px; }
+  .done-emoji { text-align:center; font-size:40px; margin:26px 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Telegram-Bot einrichten ⚙️</h1>
+  <p class="lead">In 4 Schritten bekommst du eine Nachricht, sobald jemand „Ja" drückt oder ein Date festlegt.</p>
+
+  <!-- SCHRITT 1 -->
+  <div class="card">
+    <div class="step-head"><div class="step-num">1</div><h2>Bot erstellen</h2></div>
+    <p>Öffne in Telegram <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> und schicke:</p>
+    <p><code>/newbot</code></p>
+    <p>Gib deinem Bot einen Namen (z.&nbsp;B. <i>„Date-Bot 💘"</i>) und einen Benutzernamen, der auf <code>bot</code> endet (z.&nbsp;B. <code>anna_date_bot</code>).</p>
+    <p><span class="pill">BotFather schickt dir danach den <b>Bot-Token</b> — den brauchst du in Schritt 3.</span></p>
+  </div>
+
+  <!-- SCHRITT 2 -->
+  <div class="card">
+    <div class="step-head"><div class="step-num">2</div><h2>Deine Chat-ID finden</h2></div>
+    <p>Öffne deinen neuen Bot in Telegram (über den Link, den BotFather dir geschickt hat) und <b>drücke einmal „Start"</b> bzw. schicke ihm eine beliebige Nachricht — sonst darf er dir nichts schreiben.</p>
+    <p>Dann öffne <a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a>, schicke ihm eine beliebige Nachricht, und er antwortet mit deiner <b>numerischen ID</b> (z.&nbsp;B. <code>123456789</code>).</p>
+  </div>
+
+  <!-- SCHRITT 3 -->
+  <div class="card">
+    <div class="step-head"><div class="step-num">3</div><h2>Eintragen & testen</h2></div>
+    <label for="token">Bot-Token (von BotFather)</label>
+    <input id="token" type="text" placeholder="z. B. 7123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    <label for="chatid">Deine Chat-ID (von @userinfobot)</label>
+    <input id="chatid" type="text" placeholder="z. B. 123456789" autocomplete="off" spellcheck="false">
+    <div class="row">
+      <button id="btn-test" class="btn-test">📩 Testnachricht senden</button>
+    </div>
+    <div id="status" class="status"></div>
+    <p class="tip">💡 Kommt nichts an: Wurde der Bot in Schritt 2 wirklich mit „Start" aktiviert? Stimmen Token und ID exakt?</p>
+  </div>
+
+  <!-- SCHRITT 4 -->
+  <div class="card">
+    <div class="step-head"><div class="step-num">4</div><h2>In die Website einbauen</h2></div>
+    <p>Kopiere den Block unten und ersetze in <code>index.html</code> die beiden leeren Zeilen bei <code>TELEGRAM = { … }</code> damit:</p>
+    <pre id="snippet">const TELEGRAM = {
+  BOT_TOKEN: '8647760999:AAEt32wm05C2YmyXJG_oyK17Lc9Z8l65Y7Y',
+  CHAT_ID: '7595585470',
+};</pre>
+    <div class="row">
+      <button id="btn-copy" class="btn-copy" disabled>📋 Konfiguration kopieren</button>
+    </div>
+    <div id="copy-status" class="status"></div>
+  </div>
+
+  <div class="done-emoji">💘</div>
+  <p class="lead">Fertig! Ab jetzt bekommst du eine Telegram-Nachricht, sobald jemand „Ja" drückt<br>und wenn das Date bestätigt wird — mit Datum, Uhrzeit & Aktivität. 🥳</p>
+</div>
+
+<script>
+const tokenIn = document.getElementById('token');
+const chatIn  = document.getElementById('chatid');
+const status  = document.getElementById('status');
+const snippet = document.getElementById('snippet');
+const btnCopy = document.getElementById('btn-copy');
+const btnTest = document.getElementById('btn-test');
+const copyStatus = document.getElementById('copy-status');
+
+function updateSnippet(){
+  snippet.textContent =
+`const TELEGRAM = {
+  BOT_TOKEN: '${tokenIn.value.trim()}',
+  CHAT_ID: '${chatIn.value.trim()}',
+};`;
+  const ready = tokenIn.value.trim() && chatIn.value.trim();
+  btnCopy.disabled = !ready;
+}
+tokenIn.addEventListener('input', updateSnippet);
+chatIn.addEventListener('input', updateSnippet);
+
+btnTest.addEventListener('click', async () => {
+  const token = tokenIn.value.trim();
+  const chat  = chatIn.value.trim();
+  status.className = 'status';
+  if (!token || !chat){
+    status.textContent = '⚠️ Bitte Token und Chat-ID ausfüllen.';
+    status.classList.add('err');
+    return;
+  }
+  btnTest.disabled = true;
+  status.textContent = '⏳ Sende Testnachricht…';
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        chat_id: chat,
+        text: '💘 <b>Test erfolgreich!</b>\n\nDein Date-Bot ist fertig eingerichtet. Ab jetzt bekommst du hier eine Nachricht, sobald jemand „Ja" drückt und ein Date festlegt. 🥳',
+        parse_mode:'HTML'
+      })
+    });
+    const data = await res.json();
+    if (data.ok){
+      status.textContent = '✅ Angekommen! Schau in deinen Telegram-Chat mit dem Bot.';
+      status.classList.add('ok');
+    } else {
+      const desc = data.description || 'Unbekannter Fehler';
+      let hint = '';
+      if (/chat not found/i.test(desc)) hint = ' → Prüfe die Chat-ID (Schritt 2).';
+      if (/unauthorized|not found/i.test(desc)) hint = ' → Prüfe den Bot-Token (Schritt 1).';
+      if (/bot was blocked|forbidden/i.test(desc)) hint = ' → Drücke im Bot-Chat einmal „Start".';
+      status.textContent = '❌ ' + desc + hint;
+      status.classList.add('err');
+    }
+  } catch(e){
+    status.textContent = '❌ Netzwerkfehler: ' + e.message;
+    status.classList.add('err');
+  }
+  btnTest.disabled = false;
+});
+
+btnCopy.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(snippet.textContent);
+    copyStatus.textContent = '✅ Kopiert! Jetzt in index.html einfügen.';
+    copyStatus.className = 'status ok';
+  } catch(e){
+    // Fallback: Text manuell markieren
+    const range = document.createRange();
+    range.selectNodeContents(snippet);
+    const sel = window.getSelection();
+    sel.removeAllRanges(); sel.addRange(range);
+    copyStatus.textContent = 'Text ist markiert – kopiere ihn mit Strg/Cmd + C.';
+    copyStatus.className = 'status err';
+  }
+});
+</script>
+</body>
+</html>
