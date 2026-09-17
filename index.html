@@ -780,22 +780,6 @@
   .intro-text { font-size:16.5px; line-height:1.65; color:var(--ink); font-style:italic; margin-bottom:10px; }
   .intro-sign { font-family:'Great Vibes',cursive; font-size:24px; color:var(--rose-deep); text-align:right; margin-top:14px; }
 
-  /* ---------- Story: Erinnerungsbilder ---------- */
-  .mem-card {
-    background:linear-gradient(160deg,#fffdf8,#fdf3e3);
-    border:1px solid rgba(212,175,122,.5);
-    border-radius:12px;
-    padding:28px 22px;
-    min-height:150px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
-    box-shadow:0 14px 34px -18px rgba(110,22,56,.35);
-    animation:letterIn .45s ease;
-  }
-  .mem-card .mem-emoji { font-size:44px; }
-  .mem-card .mem-img { max-width:100%; max-height:160px; border-radius:8px; object-fit:cover; }
-  .mem-card .mem-title { font-weight:600; font-size:18px; color:var(--rose-deep); letter-spacing:.04em; }
-  .mem-card .mem-text { font-size:15.5px; font-style:italic; color:var(--ink); line-height:1.55; text-align:center; }
-
   /* ---------- Stimmung & Treffpunkt ---------- */
   .opts { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .opt {
@@ -875,9 +859,6 @@
     .intro-salut{ font-size:26px; }
     .intro-text{ font-size:15px; }
     .intro-sign{ font-size:21px; }
-    .mem-card{ padding:20px 14px; min-height:130px; }
-    .mem-card .mem-title{ font-size:16.5px; }
-    .mem-card .mem-text{ font-size:14.5px; }
     .opt{ padding:13px 11px; font-size:14.5px; }
     .opt span{ font-size:22px; }
     .ceremony-env{ width:170px; height:115px; }
@@ -947,21 +928,6 @@
     <div class="reason-nav">
       <button id="reason-next" class="reason-btn">Weiter ➜</button>
       <button id="reason-skip" class="reason-btn ghost">direkt zum Datum ➜</button>
-    </div>
-  </section>
-
-  <!-- ================= VIEW 1.6 : Erinnerungsbilder (Story) ================= -->
-  <section id="view-memories" class="view">
-    <div class="ornament">✦ Kleine Erinnerungen ✦</div>
-    <span class="glow-heart">💭</span>
-    <div class="mem-card" id="mem-card">
-      <div class="mem-emoji" id="mem-emoji">🧸</div>
-      <div class="mem-title" id="mem-title">Erinnerung 1 von 3</div>
-      <div class="mem-text" id="mem-text"></div>
-    </div>
-    <div class="reason-nav" style="margin-top:22px;">
-      <button id="mem-next-btn" class="reason-btn">Weiter ➜</button>
-      <button id="mem-skip-btn" class="reason-btn ghost">direkt zum Datum ➜</button>
     </div>
   </section>
 
@@ -1533,42 +1499,10 @@ $('reason-next').addEventListener('click', () => {
     reasonsPingSent = true;
     sendTelegram('💌 <b>Sie hat alle 5 Gründe gelesen!</b> Jemand sitzt gerade ganz still da und denkt nach… 😌');
   }
-  showView('view-memories');
-  initMemories();
-});
-$('reason-skip').addEventListener('click', () => {
-  showView('view-memories');
-  initMemories();
-});
-
-/* =====================================================
-   STORY – Erinnerungsbilder
-===================================================== */
-const MEMORIES = [
-  { emoji:'🧸', text:'An das erste Mal, dass wir gelacht haben, bis uns der Bauch weh tat. Ich glaube, in diesem Moment habe ich zum ersten Mal gedacht: bei ihr fühle ich mich zuhause.' },
-  { emoji:'🌦️', text:'An den Tag, an dem alles dumm lief — Regen, Stress, Chaos. Und es war trotzdem schön, weil du einfach da warst.' },
-  { emoji:'🌙', text:'An all die Abende, an denen ich an dich gedacht habe und mir dachte: mit ihr würde selbst ein ganz normaler Dienstag zu etwas Besonderem.' }
-];
-let memIdx = 0;
-
-function initMemories(){ memIdx = 0; renderMemory(); }
-function renderMemory(){
-  const m = MEMORIES[memIdx];
-  $('mem-emoji').textContent = m.emoji;
-  $('mem-title').textContent = 'Erinnerung ' + (memIdx + 1) + ' von ' + MEMORIES.length;
-  $('mem-text').textContent = m.text;
-  $('mem-next-btn').textContent = (memIdx === MEMORIES.length - 1) ? 'Jetzt zum Datum ➜' : 'Weiter ➜';
-  const card = $('mem-card');
-  card.style.animation = 'none';
-  void card.offsetWidth; /* Reflow, damit die Animation neu startet */
-  card.style.animation = '';
-}
-$('mem-next-btn').addEventListener('click', () => {
-  if (memIdx < MEMORIES.length - 1){ memIdx++; renderMemory(); return; }
   showView('view-calendar');
   renderCalendar();
 });
-$('mem-skip-btn').addEventListener('click', () => {
+$('reason-skip').addEventListener('click', () => {
   showView('view-calendar');
   renderCalendar();
 });
