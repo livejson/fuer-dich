@@ -1,2 +1,4 @@
 .freebuff/
 *.zip
+build-mobile-test.js
+mobile-test.html

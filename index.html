@@ -121,43 +121,6 @@
     pointer-events:none;
   }
 
-  @media (max-width:520px){
-    .card{ padding:34px 18px 30px; border-radius:16px; }
-    .card::before{ inset:7px; }
-    h1{ font-size:clamp(25px,7vw,32px); }
-    .sub{ font-size:16px; margin-bottom:24px; }
-    .ornament{ font-size:11px; letter-spacing:.22em; margin-bottom:12px; }
-    .ornament::before, .ornament::after{ width:34px; }
-    .glow-heart{ font-size:46px; }
-    .final-emoji{ font-size:54px; }
-    .btn{ padding:14px 34px; font-size:17px; }
-    .btn-row{ gap:14px; min-height:96px; }
-    .cal-head h2{ font-size:18px; }
-    .nav-btn{ width:44px; height:44px; font-size:19px; }
-    .day{ font-size:15.5px; border-radius:11px; }
-    .chip{ padding:10px 16px; font-size:14.5px; }
-    .act{ padding:16px 12px; font-size:15px; }
-    .act span{ font-size:28px; }
-    .letter{ padding:22px 16px 20px; }
-    .letter::before{ inset:6px; }
-    .letter-salut{ font-size:29px; margin-bottom:8px; }
-    .letter-row{ padding:8px 0; gap:8px; }
-    .letter-key{ width:76px; font-size:11px; letter-spacing:.12em; }
-    .letter-val{ font-size:15.5px; }
-    .letter-val.accent{ font-size:17px; }
-    .letter-sign{ font-size:23px; margin-top:10px; }
-    .letter-wax{ width:44px; height:44px; font-size:17px; right:16px; bottom:-18px; }
-    .best-line{ font-size:16.5px; margin-top:22px; }
-    .best-line .script{ font-size:22px; }
-    .action-btn{ padding:12px 16px; font-size:14.5px; }
-    .env-hint{ font-size:15.5px; text-align:center; padding:0 10px; }
-    .big-btn{ padding:15px; font-size:15.5px; }
-  }
-  @media (max-width:360px){
-    .letter-key{ width:64px; }
-    .btn{ padding:13px 26px; }
-  }
-
   .view { display:none; }
   .view.active { display:block; animation:pop .7s cubic-bezier(.2,.9,.3,1.1); }
   @keyframes pop {
@@ -707,6 +670,48 @@
   @keyframes sparkleFade {
     0%{ transform:translate(-50%,-50%) scale(.4) rotate(0deg); opacity:.85; }
     100%{ transform:translate(-50%,-150%) scale(1.05) rotate(55deg); opacity:0; }
+  }
+
+  /* =====================================================
+     MOBILE-ANPASSUNGEN — bewusst am Ende des Stylesheets,
+     damit sie die Basisregeln zuverlässig überschreiben.
+  ====================================================== */
+  @media (max-width:520px){
+    .card{ padding:34px 18px 30px; border-radius:16px; }
+    .card::before{ inset:7px; }
+    h1{ font-size:clamp(25px,7vw,32px); }
+    .sub{ font-size:16px; margin-bottom:24px; }
+    .ornament{ font-size:11px; letter-spacing:.22em; margin-bottom:12px; }
+    .ornament::before, .ornament::after{ width:34px; }
+    .glow-heart{ font-size:46px; }
+    .final-emoji{ font-size:54px; }
+    .btn{ padding:14px 34px; font-size:17px; }
+    .btn-row{ gap:14px; min-height:96px; }
+    .cal-head h2{ font-size:18px; }
+    .nav-btn{ width:44px; height:44px; font-size:19px; }
+    .day{ font-size:15.5px; border-radius:11px; }
+    .chip{ padding:12px 16px; font-size:14.5px; }
+    .act{ padding:16px 12px; font-size:15px; }
+    .act span{ font-size:28px; }
+    .letter{ padding:22px 16px 20px; }
+    .letter::before{ inset:6px; }
+    .letter-salut{ font-size:29px; margin-bottom:8px; }
+    .letter-row{ padding:8px 0; gap:8px; }
+    .letter-key{ width:76px; font-size:11px; letter-spacing:.12em; }
+    .letter-val{ font-size:15.5px; }
+    .letter-val.accent{ font-size:17px; }
+    .letter-sign{ font-size:23px; margin-top:10px; }
+    .letter-wax{ width:44px; height:44px; font-size:17px; right:16px; bottom:-18px; }
+    .best-line{ font-size:16.5px; margin-top:22px; }
+    .best-line .script{ font-size:22px; }
+    .action-btn{ padding:12px 16px; font-size:14.5px; }
+    .env-hint{ font-size:15.5px; text-align:center; padding:0 10px; }
+    .big-btn{ padding:15px; font-size:15.5px; }
+  }
+  @media (max-width:360px){
+    .letter-key{ width:auto; }
+    .letter-row{ flex-direction:column; align-items:flex-start; gap:3px; }
+    .btn{ padding:13px 26px; }
   }
 </style>
 </head>
