@@ -1397,6 +1397,11 @@ function saveToCalendar(){
       'DTEND:' + fmt(end),
       'SUMMARY:' + esc('Date mit Jason 💘'),
       'DESCRIPTION:' + esc('Wir tun: ' + (state.activity || '') + '\n\nEine Einladung, die man nicht ablehnen kann 🌹'),
+      'BEGIN:VALARM',
+      'TRIGGER:-PT24H',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:' + esc('Morgen ist es so weit: Dein Date mit Jason 💘'),
+      'END:VALARM',
       'END:VEVENT',
       'END:VCALENDAR',
     ].join('\r\n');
