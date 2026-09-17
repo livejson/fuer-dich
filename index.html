@@ -681,6 +681,11 @@
     <div class="section-label">Die Stunde</div>
     <div id="time-chips" class="chips"></div>
 
+    <div class="own-box name-box">
+      <label for="name-input">Wie heißt du, meine Liebste?</label>
+      <input id="name-input" type="text" maxlength="40" placeholder="Dein schöner Name…" autocomplete="name">
+    </div>
+
     <button id="to-activities" class="big-btn" disabled>Weiter ➜</button>
     <button class="back-link" data-goto="view-question">← zurück</button>
   </section>
@@ -715,7 +720,7 @@
     <h1>Es ist ein Versprechen.</h1>
 
     <div class="letter">
-      <div class="letter-salut">Meine Liebste,</div>
+      <div class="letter-salut" id="final-salut">Meine Liebste,</div>
       <div class="letter-row">
         <div class="letter-key">Datum</div>
         <div class="letter-val" id="final-when">…</div>
@@ -728,7 +733,7 @@
         <div class="letter-key">Wir tun</div>
         <div class="letter-val accent" id="final-what"></div>
       </div>
-      <div class="letter-sign">in Vorfreude, dein Verehrer</div>
+      <div class="letter-sign">in Vorfreude, Dein Jason</div>
       <div class="letter-wax">🌹</div>
     </div>
 
@@ -769,7 +774,7 @@ async function sendTelegram(text){
 /* =====================================================
    State & Helfer
 ===================================================== */
-const state = { day:null, time:null, activity:null };
+const state = { day:null, time:null, activity:null, name:'' };
 const $ = id => document.getElementById(id);
 
 function showView(id){
@@ -981,6 +986,13 @@ function renderCalendar(){
 }
 
 const TIMES = ['10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+const nameInput = $('name-input');
+
+nameInput.addEventListener('input', () => {
+  state.name = nameInput.value.trim();
+  updateCalContinue();
+});
+
 function renderTimeChips(){
   const box = $('time-chips');
   box.innerHTML = '';
@@ -1006,7 +1018,7 @@ function renderTimeChips(){
 renderTimeChips();
 
 function updateCalContinue(){
-  $('to-activities').disabled = !(state.day && state.time);
+  $('to-activities').disabled = !(state.day && state.time && state.name);
 }
 $('to-activities').addEventListener('click', () => {
   if (!state.day || !state.time) return;
@@ -1042,6 +1054,8 @@ $('to-final').addEventListener('click', () => {
   if (!state.activity) return;
   const dateStr = state.day.toLocaleDateString('de-DE',
     { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const name = state.name || 'Liebste';
+  $('final-salut').textContent = 'Liebe ' + name + ',';
   $('final-when').textContent = dateStr;
   $('final-hour').textContent = state.time + ' Uhr';
   $('final-what').textContent = state.activity;
@@ -1050,6 +1064,7 @@ $('to-final').addEventListener('click', () => {
   burstFireworks(6);
   sendTelegram(
     '🌹 <b>DATE BESTÄTIGT!</b> 🌹\n\n' +
+    '💌 <b>Liebe ' + name + '</b>\n\n' +
     '📅 ' + dateStr + '\n' +
     '🕐 ' + state.time + ' Uhr\n' +
     '✨ ' + state.activity + '\n\n' +
