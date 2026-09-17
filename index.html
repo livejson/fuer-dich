@@ -526,11 +526,50 @@
   }
   .sound-toggle:hover { transform:scale(1.1); }
   .sound-toggle.muted { opacity:.55; }
+
+  /* Geheime Musikbox 🎵 */
+  .musicbox {
+    position:fixed;
+    bottom:20px; right:20px;
+    z-index:80;
+    width:52px; height:52px;
+    border-radius:50%;
+    font-size:22px;
+    background:linear-gradient(135deg,#ffffff,#ffe4ee);
+    box-shadow:0 10px 22px -8px rgba(140,60,120,.5);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(24px) scale(.5);
+    transition:opacity .5s ease, transform .5s cubic-bezier(.2,.9,.3,1.4);
+  }
+  .musicbox.show {
+    opacity:1; pointer-events:auto;
+    transform:translateY(0) scale(1);
+    animation:mbBob 2.4s ease-in-out infinite;
+  }
+  @keyframes mbBob { 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-6px);} }
+  .musicbox.playing {
+    background:linear-gradient(135deg,#ffd3e0,#ff9fbd);
+    box-shadow:0 12px 26px -6px rgba(230,60,111,.8), 0 0 0 7px rgba(255,92,138,.14);
+  }
+  .float-note {
+    position:fixed;
+    z-index:79;
+    pointer-events:none;
+    animation:noteRise 2.3s ease-out forwards;
+  }
+  @keyframes noteRise {
+    0%{ transform:translate(0,0) scale(.5) rotate(-12deg); opacity:0; }
+    18%{ opacity:.9; }
+    100%{ transform:translate(var(--nx,0px), -95px) scale(1.15) rotate(16deg); opacity:0; }
+  }
 </style>
 </head>
 <body>
 
 <button id="sound-toggle" class="sound-toggle" title="Sound an/aus">🔊</button>
+<button id="musicbox" class="musicbox" title="Geheime Musikbox 🎵">🎵</button>
 
 <div class="card" id="main-card">
 
@@ -667,7 +706,7 @@ async function sendTelegram(text){
 }
 
 /* =====================================================
-   Sound-Engine (WebAudio – keine Dateien nötig!)
+   Sound-Engine: romantische Klaviernoten 🎹 (WebAudio)
 ===================================================== */
 let audioCtx = null;
 let soundOn = true;
@@ -679,35 +718,119 @@ function ensureAudio(){
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
-function tone(freq, dur=0.12, type='sine', vol=0.15, when=0){
+
+/* Weicher Klavier-Ton: Grundton + 2 Obertöne + sanfte Hüllkurve */
+function piano(freq, dur=0.9, vol=0.1, when=0){
   if (!soundOn) return;
   const ctx = ensureAudio();
   if (!ctx) return;
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.setValueAtTime(vol, ctx.currentTime + when);
-  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + when + dur);
-  o.connect(g); g.connect(ctx.destination);
-  o.start(ctx.currentTime + when);
-  o.stop(ctx.currentTime + when + dur + 0.05);
+  const t0 = ctx.currentTime + when;
+  [[1,'triangle',1],[2,'sine',.4],[3,'sine',.14]].forEach(([mult,type,g])=>{
+    const o = ctx.createOscillator();
+    const gn = ctx.createGain();
+    o.type = type; o.frequency.value = freq*mult;
+    gn.gain.setValueAtTime(0.0001, t0);
+    gn.gain.exponentialRampToValueAtTime(vol*g, t0+0.018);
+    gn.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+    o.connect(gn); gn.connect(ctx.destination);
+    o.start(t0); o.stop(t0+dur+0.05);
+  });
 }
+
+const N = { G3:196.00, A3:220.00, B3:246.94, C4:261.63, D4:293.66, E4:329.63,
+            F4:349.23, G4:392.00, A4:440.00, B4:493.88, C5:523.25, D5:587.33,
+            E5:659.26, G5:783.99, A5:880.00, C6:1046.50 };
+const PENTA = [N.C5, N.D5, N.E5, N.G5, N.A5];
+
 const SFX = {
-  pop()     { tone(520,.09,'sine',.12); tone(780,.08,'sine',.1,.05); },
-  dodge()   { tone(300,.06,'square',.05); tone(220,.08,'square',.05,.04); },
-  open()    { [392,494,587,784].forEach((f,i)=>tone(f,.16,'sine',.12,i*.09)); },
-  select()  { tone(660,.1,'triangle',.12); },
-  confirm() { [523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',.14,i*.1)); },
-  final()   { [523,659,784,1047,1319].forEach((f,i)=>tone(f,.3,'sine',.15,i*.12)); }
+  pop()     { piano(N.E5,.5,.09); piano(N.G5,.5,.07,.07); },
+  dodge()   { piano(N.G3,.35,.07); },
+  open()    { [N.C4,N.E4,N.G4,N.C5].forEach((f,i)=>piano(f,1.0,.1,i*.1)); },
+  select()  { piano(PENTA[Math.floor(Math.random()*PENTA.length)],.6,.09); },
+  confirm() { [N.C4,N.E4,N.G4,N.C5,N.E5].forEach((f,i)=>piano(f,.9,.11,i*.09)); },
+  final()   { [N.C4,N.G4,N.E5,N.C5,N.E5,N.G5,N.C6].forEach((f,i)=>piano(f,1.3,.12,i*.13)); }
 };
 
+/* ---------- Die geheime Musikbox 🎵 ---------- */
+const CHORDS = [ /* C – G – Am – Em – F – C – F – G (sanfte Romanze) */
+  [N.C4,N.E4,N.G4,N.C5],
+  [N.B3,N.D4,N.G4,N.B4],
+  [N.A3,N.C4,N.E4,N.A4],
+  [N.G3,N.B3,N.E4,N.G4],
+  [N.A3,N.C4,N.F4,N.A4],
+  [N.C4,N.E4,N.G4,N.C5],
+  [N.A3,N.C4,N.F4,N.A4],
+  [N.B3,N.D4,N.G4,N.B4],
+];
+const BAR_MS = 1700;
+let musicEnabled = false;
+let musicTimer = null;
+let barIdx = 0;
+
+const musicBox = document.getElementById('musicbox');
+
+function playBar(){
+  const chord = CHORDS[barIdx % CHORDS.length];
+  barIdx++;
+  piano(chord[0]/2, 1.8, .05);  /* Bass */
+  [0,1,2,3,2,3].forEach((ci,i)=> piano(chord[ci], 1.1, .05, .05 + i*.26));
+  if (Math.random() < .5) spawnMusicNote();
+}
+function startMusicLoop(){
+  if (musicTimer || !soundOn) return;
+  ensureAudio();
+  playBar();
+  musicTimer = setInterval(playBar, BAR_MS);
+  musicBox.classList.add('playing');
+}
+function stopMusicLoop(){
+  clearInterval(musicTimer);
+  musicTimer = null;
+  musicBox.classList.remove('playing');
+}
+musicBox.addEventListener('click', () => {
+  musicEnabled = !musicEnabled;
+  if (musicEnabled){ startMusicLoop(); SFX.select(); } else stopMusicLoop();
+  savePrefs();
+});
+
+/* Kleine ♪-Noten steigen aus der Box auf */
+function spawnMusicNote(){
+  if (document.hidden) return;
+  const r = musicBox.getBoundingClientRect();
+  const n = document.createElement('div');
+  n.className = 'float-note';
+  n.textContent = ['♪','♫','🎵','💕'][Math.floor(Math.random()*4)];
+  n.style.left = (r.left + r.width/2 - 10 + (Math.random()*24-12)) + 'px';
+  n.style.top  = (r.top - 8) + 'px';
+  n.style.fontSize = (14 + Math.random()*9) + 'px';
+  n.style.setProperty('--nx', (Math.random()*44-22) + 'px');
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2400);
+}
+
+/* ---------- Master-Sound-Schalter ---------- */
 const soundToggle = document.getElementById('sound-toggle');
 soundToggle.addEventListener('click', () => {
   soundOn = !soundOn;
   soundToggle.textContent = soundOn ? '🔊' : '🔇';
   soundToggle.classList.toggle('muted', !soundOn);
-  if (soundOn){ ensureAudio(); SFX.pop(); }
+  if (!soundOn) stopMusicLoop();
+  else { ensureAudio(); if (musicEnabled) startMusicLoop(); SFX.pop(); }
+  savePrefs();
 });
+
+/* ---------- Einstellungen merken ---------- */
+function savePrefs(){
+  try { localStorage.setItem('dw_prefs', JSON.stringify({ sound:soundOn, music:musicEnabled })); } catch(e){}
+}
+(function loadPrefs(){
+  try {
+    const p = JSON.parse(localStorage.getItem('dw_prefs') || '{}');
+    if (p.sound === false){ soundOn = false; soundToggle.textContent = '🔇'; soundToggle.classList.add('muted'); }
+    if (p.music){ musicEnabled = true; musicBox.classList.add('show'); }
+  } catch(e){}
+})();
 
 /* =====================================================
    State & Helfer
@@ -786,6 +909,8 @@ envelope.addEventListener('click', () => {
   SFX.open();
   burstFireworks(3);
   envelope.classList.add('opening');
+  musicBox.classList.add('show');
+  if (musicEnabled) startMusicLoop();
   setTimeout(() => showView('view-question'), 950);
 });
 
@@ -1033,7 +1158,10 @@ function startConfetti(){
 }
 
 /* Erster User-Klick aktiviert Audio-Kontext (Browser-Policy) */
-document.addEventListener('pointerdown', () => ensureAudio(), { once:true });
+document.addEventListener('pointerdown', () => {
+  ensureAudio();
+  if (musicEnabled) startMusicLoop();
+}, { once:true });
 </script>
 </body>
 </html>
