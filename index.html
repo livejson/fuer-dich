@@ -147,8 +147,9 @@
     .letter-val.accent{ font-size:17px; }
     .letter-sign{ font-size:23px; margin-top:10px; }
     .letter-wax{ width:44px; height:44px; font-size:17px; right:16px; bottom:-18px; }
-    .best-line{ font-size:16.5px; margin-top:26px; }
+    .best-line{ font-size:16.5px; margin-top:22px; }
     .best-line .script{ font-size:22px; }
+    .action-btn{ padding:12px 16px; font-size:14.5px; }
     .env-hint{ font-size:15.5px; text-align:center; padding:0 10px; }
     .big-btn{ padding:15px; font-size:15.5px; }
   }
@@ -594,6 +595,46 @@
     transform:rotate(-8deg);
   }
 
+  /* ---------- Aktionen unter dem Brief ---------- */
+  .action-row {
+    display:flex; gap:12px; justify-content:center; align-items:center;
+    margin-top:28px; flex-wrap:wrap;
+  }
+  .action-btn {
+    padding:12px 22px;
+    font-size:15.5px;
+    font-weight:600;
+    letter-spacing:.04em;
+    color:var(--wine);
+    background:rgba(255,255,255,.6);
+    border:1px solid rgba(212,175,122,.6);
+    border-radius:8px;
+    transition:all .2s ease;
+  }
+  @media (hover:hover){ .action-btn:hover { background:rgba(224,80,122,.1); border-color:var(--rose); transform:translateY(-2px); } }
+  .save-status {
+    margin-top:12px;
+    font-size:15px;
+    font-style:italic;
+    color:var(--rose-deep);
+    min-height:20px;
+  }
+
+  /* ---------- Herz-Spray ---------- */
+  .heart-spray {
+    position:fixed;
+    z-index:75;
+    pointer-events:none;
+    transform:translate(-50%,-50%);
+    animation:heartFly ease-out forwards;
+    filter:drop-shadow(0 2px 6px rgba(163,32,75,.35));
+  }
+  @keyframes heartFly {
+    0%{ transform:translate(-50%,-50%) scale(.4) rotate(0deg); opacity:0; }
+    12%{ opacity:1; }
+    100%{ transform:translate(calc(-50% + var(--dx,0px)), calc(-50% + var(--dy,0px))) scale(1.15) rotate(var(--rot,0deg)); opacity:0; }
+  }
+
   .best-line {
     margin-top:34px;
     font-size:19px;
@@ -775,6 +816,12 @@
       <div class="letter-sign">in Vorfreude, Dein Jason</div>
       <div class="letter-wax">🌹</div>
     </div>
+
+    <div class="action-row">
+      <button id="save-img" class="action-btn">💌 Als Bild speichern</button>
+      <button id="save-cal" class="action-btn">📅 In Kalender speichern</button>
+    </div>
+    <div id="save-status" class="save-status"></div>
 
     <p class="best-line">Du hast gerade <span class="script">die beste Entscheidung</span> deines Lebens getroffen! 💖</p>
     <p class="footer-note">Ich freue mich schon auf diesen Moment. Bis bald! 😍</p>
@@ -1032,11 +1079,34 @@ btnNo.addEventListener('click',      (e) => fleeFrom(e.clientX, e.clientY));
 
 btnYes.addEventListener('click', () => {
   btnYes.style.transform = '';
+  const br = btnYes.getBoundingClientRect();
+  heartSpray(br.left + br.width/2, br.top + br.height/2);
   burstFireworks(2);
   showView('view-calendar');
   renderCalendar();
   sendTelegram('🌹 <b>Jemand hat gerade JA gedrückt!</b>\n Und jetzt wird ein Date ausgewählt… 😍');
 });
+
+/* Herz-Spray: Herzen sprühen von einem Punkt nach allen Richtungen */
+function heartSpray(x, y){
+  const HEARTS = ['💖','💗','💘','💕','🤍','❤️','💗'];
+  for (let i = 0; i < 30; i++){
+    const h = document.createElement('div');
+    h.className = 'heart-spray';
+    h.textContent = HEARTS[i % HEARTS.length];
+    h.style.left = x + 'px';
+    h.style.top = y + 'px';
+    h.style.fontSize = (14 + Math.random()*16) + 'px';
+    const angle = Math.random()*Math.PI*2;
+    const dist = 70 + Math.random()*140;
+    h.style.setProperty('--dx', (Math.cos(angle)*dist).toFixed(0) + 'px');
+    h.style.setProperty('--dy', (Math.sin(angle)*dist - 45).toFixed(0) + 'px');
+    h.style.setProperty('--rot', (Math.random()*130-65).toFixed(0) + 'deg');
+    h.style.animationDuration = (0.9 + Math.random()*0.7).toFixed(2) + 's';
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 1800);
+  }
+}
 
 /* =====================================================
    VIEW 2 – Kalender & Uhrzeit
@@ -1178,6 +1248,167 @@ $('to-final').addEventListener('click', () => {
     'Das Date ist offiziell! 🥳'
   );
 });
+
+/* =====================================================
+   Brief als Bild speichern (Canvas → PNG)
+===================================================== */
+const saveStatus = $('save-status');
+function flashStatus(msg){
+  saveStatus.textContent = msg;
+  setTimeout(() => { if (saveStatus.textContent === msg) saveStatus.textContent = ''; }, 4000);
+}
+
+function downloadBlob(blob, filename){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+async function saveLetterImage(){
+  try {
+    await document.fonts.ready; // Schriften sind geladen → sauberes Bild
+    const W = 900, H = 660, S = 2;
+    const cv = document.createElement('canvas');
+    cv.width = W*S; cv.height = H*S;
+    const ctx = cv.getContext('2d');
+    ctx.scale(S, S);
+
+    // Pergament-Hintergrund
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#fffdf8');
+    bg.addColorStop(1, '#fdf3e3');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Doppelrahmen in Gold
+    ctx.strokeStyle = 'rgba(212,175,122,.95)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(18, 18, W-36, H-36);
+    ctx.strokeStyle = 'rgba(212,175,122,.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(28, 28, W-56, H-56);
+
+    // Ornament oben
+    ctx.fillStyle = '#d4af7a';
+    ctx.textAlign = 'center';
+    ctx.font = '600 21px "Cormorant Garamond", serif';
+    ctx.fillText('✦   B E S I E G E L T   ✦', W/2, 88);
+
+    // Anrede in Handschrift
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#6e1638';
+    ctx.font = '52px "Great Vibes", cursive';
+    ctx.fillText($('final-salut').textContent, 70, 185);
+
+    // Zeilen: Label + Wert, mit gestrichelter Linie
+    const rows = [
+      ['DATUM',  $('final-when').textContent],
+      ['STUNDE', $('final-hour').textContent],
+      ['WIR TUN', $('final-what').textContent],
+    ];
+    let y = 262;
+    for (const [label, value] of rows){
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#d4af7a';
+      ctx.font = '600 17px "Cormorant Garamond", serif';
+      ctx.fillText(label, 70, y);
+      // Wert ggf. verkleinern, damit er passt
+      ctx.fillStyle = '#3a2430';
+      let size = 26;
+      ctx.font = '600 ' + size + 'px "Cormorant Garamond", serif';
+      while (ctx.measureText(value).width > 560 && size > 15){
+        size--;
+        ctx.font = '600 ' + size + 'px "Cormorant Garamond", serif';
+      }
+      ctx.fillText(value, 250, y);
+      // gestrichelte Trennlinie
+      ctx.strokeStyle = 'rgba(212,175,122,.45)';
+      ctx.setLineDash([5, 7]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(70, y + 30);
+      ctx.lineTo(W-70, y + 30);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      y += 78;
+    }
+
+    // Signatur
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#6e1638';
+    ctx.font = '40px "Great Vibes", cursive';
+    ctx.fillText('in Vorfreude, Dein Jason', W-160, H-105);
+
+    // Wachssiegel
+    const sx = W-95, sy = H-105, r = 50;
+    const seal = ctx.createRadialGradient(sx-15, sy-15, 8, sx, sy, r);
+    seal.addColorStop(0, '#e0507a');
+    seal.addColorStop(1, '#a3204b');
+    ctx.fillStyle = seal;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r-5, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.font = '36px serif';
+    ctx.fillText('🌹', sx, sy + 13);
+
+    cv.toBlob(blob => {
+      if (!blob){ flashStatus('Ups, das hat nicht geklappt.'); return; }
+      downloadBlob(blob, 'liebesbrief-' + (state.name || 'fuer-dich').toLowerCase() + '.png');
+      flashStatus('Gespeichert! 💾💖');
+    }, 'image/png');
+  } catch(e){
+    flashStatus('Ups, das hat nicht geklappt.');
+  }
+}
+
+/* =====================================================
+   In den Kalender speichern (.ics)
+===================================================== */
+function saveToCalendar(){
+  try {
+    if (!state.day || !state.time){ flashStatus('Bitte erst Datum & Uhrzeit wählen.'); return; }
+    const pad2 = n => String(n).padStart(2, '0');
+    const [hh, mm] = state.time.split(':').map(Number);
+    const start = new Date(state.day.getFullYear(), state.day.getMonth(), state.day.getDate(), hh, mm, 0);
+    const end = new Date(start.getTime() + 60*60*1000); // 1 Stunde
+    const fmt = dt =>
+      dt.getFullYear() + pad2(dt.getMonth()+1) + pad2(dt.getDate()) +
+      'T' + pad2(dt.getHours()) + pad2(dt.getMinutes()) + '00';
+    const esc = s => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//DateWebsite//FuerDich//DE',
+      'CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT',
+      'UID:' + Date.now() + '@fuer-dich',
+      'DTSTAMP:' + fmt(new Date()),
+      'DTSTART:' + fmt(start),
+      'DTEND:' + fmt(end),
+      'SUMMARY:' + esc('Date mit Jason 💘'),
+      'DESCRIPTION:' + esc('Wir tun: ' + (state.activity || '') + '\n\nEine Einladung, die man nicht ablehnen kann 🌹'),
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+    downloadBlob(new Blob([ics], { type:'text/calendar;charset=utf-8' }), 'date-mit-jason.ics');
+    flashStatus('Kalenderdatei geladen! 📅💖');
+  } catch(e){
+    flashStatus('Ups, das hat nicht geklappt.');
+  }
+}
+
+$('save-img').addEventListener('click', saveLetterImage);
+$('save-cal').addEventListener('click', saveToCalendar);
 
 /* =====================================================
    Effekte: Goldfeuerwerk & Rosen-Konfetti
