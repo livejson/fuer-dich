@@ -364,19 +364,6 @@
     border-color:var(--rose);
     box-shadow:0 0 0 4px rgba(224,80,122,.12);
   }
-  .own-box input.wrong-name {
-    border-color:#b3364e;
-    background:rgba(179,54,78,.06);
-    animation:shakeX .45s ease;
-  }
-  .name-hint {
-    margin-top:8px;
-    font-size:14px;
-    font-style:italic;
-    color:#b3364e;
-    animation:shakeX .2s ease;
-  }
-
   /* ---------- Großer Weiter-Button ---------- */
   .big-btn {
     margin-top:28px;
@@ -499,13 +486,6 @@
   }
   @keyframes hintBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
-  @keyframes shakeX {
-    0%,100%{ transform:translateX(0); }
-    20%{ transform:translateX(-9px); }
-    40%{ transform:translateX(8px); }
-    60%{ transform:translateX(-6px); }
-    80%{ transform:translateX(4px); }
-  }
 
   /* ---------- Rubbellos-Siegel ---------- */
   .seal-under {
@@ -948,12 +928,6 @@
     <div class="section-label">Die Stunde</div>
     <div id="time-chips" class="chips"></div>
 
-    <div class="own-box name-box">
-      <label for="name-input">Wie heißt du, meine Liebste?</label>
-      <input id="name-input" type="text" maxlength="40" placeholder="Dein schöner Name…" autocomplete="name">
-      <div id="name-hint" class="name-hint" hidden></div>
-    </div>
-
     <button id="to-activities" class="big-btn" disabled>Weiter ➜</button>
     <button class="back-link" data-goto="view-question">← zurück</button>
   </section>
@@ -1093,10 +1067,8 @@ const DATE_VENUE = {
   mapsUrl: ''     // z. B. 'https://maps.google.com/?q=Cafe+Central+Bonn'
 };
 
-/* Der einzige Name, der ein Date auswählen darf —
-   wer hier etwas anderes eintippt, bekommt „Falsche Person“.
-   Groß-/Kleinschreibung und Leerzeichen sind egal. */
-const REQUIRED_NAME = 'pia';
+/* Ihr Name — erscheint im Brief, in der Telegram-Nachricht & im Kalender-Export */
+const HER_NAME = 'Pia';
 
 async function sendTelegram(text){
   if (!TELEGRAM.BOT_TOKEN || !TELEGRAM.CHAT_ID){
@@ -1120,7 +1092,7 @@ async function sendTelegram(text){
 /* =====================================================
    State & Helfer
 ===================================================== */
-const state = { day:null, time:null, activity:null, name:'', mood:null, place:null, surprised:false };
+const state = { day:null, time:null, activity:null, name:HER_NAME, mood:null, place:null, surprised:false };
 const $ = id => document.getElementById(id);
 
 function showView(id){
@@ -1583,25 +1555,6 @@ function renderCalendar(){
 }
 
 const TIMES = ['10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
-const nameInput = $('name-input');
-const nameHint = $('name-hint');
-
-nameInput.addEventListener('input', () => {
-  const typed = nameInput.value.trim();
-  if (!REQUIRED_NAME || typed.toLowerCase() === REQUIRED_NAME){
-    /* Richtig (oder keine Prüfung aktiv) — immer als „Pia“ formatiert */
-    state.name = typed.charAt(0).toUpperCase() + typed.slice(1).toLowerCase();
-    nameInput.classList.remove('wrong-name');
-    nameHint.hidden = true;
-  } else {
-    /* Falscher Name → kein Date möglich */
-    state.name = '';
-    nameInput.classList.add('wrong-name');
-    nameHint.textContent = 'Falsche Person ❌';
-    nameHint.hidden = false;
-  }
-  updateCalContinue();
-});
 
 function renderTimeChips(){
   const box = $('time-chips');
@@ -1628,10 +1581,10 @@ function renderTimeChips(){
 renderTimeChips();
 
 function updateCalContinue(){
-  $('to-activities').disabled = !(state.day && state.time && state.name);
+  $('to-activities').disabled = !(state.day && state.time);
 }
 $('to-activities').addEventListener('click', () => {
-  if (!state.day || !state.time || !state.name) return;
+  if (!state.day || !state.time) return;
   showView('view-activities');
 });
 
