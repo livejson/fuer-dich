@@ -487,6 +487,75 @@
   }
   @keyframes hintBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
+  /* ---------- Rubbellos-Siegel ---------- */
+  .seal-under {
+    position:absolute;
+    top:44%; left:50%;
+    transform:translate(-50%,-50%);
+    width:64px; height:64px;
+    background:radial-gradient(circle at 35% 35%, #f6d9a0, #d4af7a);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+    box-shadow:0 4px 14px rgba(90,10,40,.5), inset 0 2px 6px rgba(255,255,255,.4);
+    z-index:4;
+    transition:opacity .6s ease;
+  }
+  .wax-seal.scratch {
+    width:72px; height:72px;
+    cursor:crosshair;
+    touch-action:none;
+    transition:opacity .6s ease;
+    z-index:5;
+  }
+  .wax-seal.scratch.revealed, .seal-under.revealed {
+    opacity:0;
+    pointer-events:none;
+  }
+
+  /* ---------- Warum-du?-Karte ---------- */
+  .reason-card {
+    min-height:150px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.6);
+    border:1px solid rgba(212,175,122,.4);
+    border-radius:14px;
+    padding:28px 22px;
+    margin-bottom:16px;
+    animation:pop .5s ease;
+  }
+  .reason-text {
+    font-size:21px;
+    font-style:italic;
+    color:var(--wine);
+    line-height:1.5;
+  }
+  .reason-dots { display:flex; gap:8px; justify-content:center; margin-bottom:16px; }
+  .reason-dot {
+    width:9px; height:9px; border-radius:50%;
+    background:rgba(212,175,122,.4);
+    transition:background .3s, transform .3s;
+  }
+  .reason-dot.on { background:var(--rose); transform:scale(1.3); }
+  .reason-nav { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .reason-btn {
+    padding:12px 26px;
+    border-radius:999px;
+    font-size:15px;
+    font-weight:600;
+    color:var(--cream);
+    background:linear-gradient(135deg,var(--rose),var(--rose-deep));
+    box-shadow:0 10px 22px -8px rgba(163,32,75,.7);
+    transition:transform .2s;
+  }
+  .reason-btn.ghost {
+    background:transparent;
+    color:var(--muted);
+    box-shadow:none;
+    border:1px solid rgba(151,119,136,.5);
+  }
+  @media (hover:hover){ .reason-btn:hover:not(:disabled){ transform:translateY(-2px); } }
+
   /* ---------- Finale: Liebesbrief ---------- */
   .final-emoji { font-size:64px; }
 
@@ -705,6 +774,8 @@
     .best-line{ font-size:16.5px; margin-top:22px; }
     .best-line .script{ font-size:22px; }
     .action-btn{ padding:12px 16px; font-size:14.5px; }
+    .reason-text{ font-size:18px; }
+    .reason-btn{ padding:12px 20px; font-size:14.5px; }
     .env-hint{ font-size:15.5px; text-align:center; padding:0 10px; }
     .big-btn{ padding:15px; font-size:15.5px; }
   }
@@ -730,9 +801,10 @@
         </div>
         <div class="env-front"></div>
         <div class="env-flap"></div>
-        <div class="wax-seal">🌹</div>
+        <div class="seal-under" id="seal-under">💖</div>
+        <canvas id="scratch-canvas" class="wax-seal scratch"></canvas>
       </div>
-      <div class="env-hint">— berühre das Siegel, um den Brief zu öffnen —</div>
+      <div class="env-hint">— kratze das Siegel frei, um den Brief zu öffnen —</div>
     </div>
   </section>
 
@@ -747,6 +819,21 @@
       <button id="btn-no" class="btn btn-no">Nein</button>
     </div>
     <p id="taunt" class="taunt"></p>
+  </section>
+
+  <!-- ================= VIEW 1.5 : Warum du? ================= -->
+  <section id="view-reasons" class="view">
+    <div class="ornament">✦ Fünf Gründe ✦</div>
+    <span class="glow-heart">💭</span>
+    <h1>Warum eigentlich du?</h1>
+    <p class="sub">Weil es dafür mehr Gründe gibt als Sterne am Himmel — hier sind fünf davon…</p>
+
+    <div class="reason-card"><div class="reason-text" id="reason-text"></div></div>
+    <div class="reason-dots" id="reason-dots"></div>
+    <div class="reason-nav">
+      <button id="reason-next" class="reason-btn">Weiter ➜</button>
+      <button id="reason-skip" class="reason-btn ghost">direkt zum Datum ➜</button>
+    </div>
   </section>
 
   <!-- ================= VIEW 2 : Kalender ================= -->
@@ -818,6 +905,10 @@
         <div class="letter-key">Wir tun</div>
         <div class="letter-val accent" id="final-what"></div>
       </div>
+      <div class="letter-row" id="row-venue" style="display:none">
+        <div class="letter-key">Ort</div>
+        <div class="letter-val accent" id="final-venue"></div>
+      </div>
       <div class="letter-sign">in Vorfreude, Dein Jason</div>
       <div class="letter-wax">🌹</div>
     </div>
@@ -841,6 +932,12 @@
 const TELEGRAM = {
   BOT_TOKEN: '8647760999:AAEt32wm05C2YmyXJG_oyK17Lc9Z8l65Y7Y',
   CHAT_ID: '7595585470',
+};
+
+/* Ort eures Dates (optional) — erscheint im Kalender-Eintrag, Brief & Telegram */
+const DATE_VENUE = {
+  name: '',       // z. B. 'Café Central, Bonn'
+  mapsUrl: ''     // z. B. 'https://maps.google.com/?q=Cafe+Central+Bonn'
 };
 
 async function sendTelegram(text){
@@ -959,15 +1056,99 @@ document.addEventListener('pointermove', (e) => {
 /* =====================================================
    VIEW 0 – Umschlag öffnen
 ===================================================== */
+/* =====================================================
+   VIEW 0 – Rubbellos-Siegel & Umschlag
+===================================================== */
 const envelope = $('envelope');
 let envelopeOpened = false;
-envelope.addEventListener('click', () => {
+
+function openEnvelope(){
   if (envelopeOpened) return;
   envelopeOpened = true;
   burstFireworks(3);
   envelope.classList.add('opening');
   setTimeout(() => showView('view-question'), 1050);
+}
+
+/* Klick auf den Umschlag (nicht aufs Siegel) → sanftes Wackeln als Hinweis */
+envelope.addEventListener('click', (e) => {
+  if (envelopeOpened || e.target.id === 'scratch-canvas') return;
+  envelope.style.animation = 'hintBob .4s ease 2';
+  setTimeout(() => envelope.style.animation = '', 900);
 });
+
+(function initScratch(){
+  const cv = $('scratch-canvas');
+  const SIZE = 72;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = SIZE * dpr;
+  cv.height = SIZE * dpr;
+  const ctx = cv.getContext('2d');
+  if (!ctx) return;
+  ctx.scale(dpr, dpr);
+
+  function drawSeal(){
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    const g = ctx.createRadialGradient(26, 26, 6, SIZE/2, SIZE/2, SIZE/2);
+    g.addColorStop(0, '#e0507a');
+    g.addColorStop(1, '#a3204b');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 2, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 7, 0, Math.PI*2); ctx.stroke();
+    ctx.font = '26px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🌹', SIZE/2, SIZE/2 + 2);
+  }
+  drawSeal();
+
+  let down = false, moves = 0, done = false;
+  function pos(e){
+    const r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * (SIZE / r.width), y: (e.clientY - r.top) * (SIZE / r.height) };
+  }
+  function scratchAt(x, y){
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 11, 0, Math.PI*2);
+    ctx.fill();
+  }
+  function checkProgress(){
+    if (done) return;
+    const img = ctx.getImageData(0, 0, cv.width, cv.height).data;
+    let clear = 0, total = 0;
+    for (let i = 3; i < img.length; i += 24){ // jedes 6. Pixel
+      total++;
+      if (img[i] < 40) clear++;
+    }
+    if (clear / Math.max(1, total) > 0.5) finish();
+  }
+  function finish(){
+    if (done) return;
+    done = true;
+    cv.classList.add('revealed');
+    $('seal-under').classList.add('revealed');
+    burstFireworks(1);
+    setTimeout(openEnvelope, 400);
+  }
+  cv.addEventListener('pointerdown', (e) => {
+    down = true;
+    const p = pos(e);
+    scratchAt(p.x, p.y);
+    e.preventDefault();
+  });
+  cv.addEventListener('pointermove', (e) => {
+    if (!down || done) return;
+    const p = pos(e);
+    scratchAt(p.x, p.y);
+    if (++moves % 8 === 0) checkProgress();
+  });
+  window.addEventListener('pointerup', () => { down = false; checkProgress(); });
+  cv.addEventListener('pointerleave', () => { if (down && !done) checkProgress(); });
+})();
 
 /* =====================================================
    VIEW 1 – Der ausweichende „Nein"-Button
@@ -1087,9 +1268,57 @@ btnYes.addEventListener('click', () => {
   const br = btnYes.getBoundingClientRect();
   heartSpray(br.left + br.width/2, br.top + br.height/2);
   burstFireworks(2);
+  showView('view-reasons');
+  initReasons();
+  sendTelegram('🌹 <b>Jemand hat gerade JA gedrückt!</b>\n Und jetzt wird ein Date ausgewählt… 😍');
+});
+
+/* =====================================================
+   VIEW 1.5 – „Warum du?"-Karte
+===================================================== */
+const REASONS = [
+  'Weil dein Lachen der schönste Klang ist, den ich kenne.',
+  'Weil die Zeit mit dir immer viel zu schnell vergeht.',
+  'Weil du mich zum Lächeln bringst, selbst wenn ich nur an dich denke.',
+  'Weil du einfach du bist — und genau das ist perfekt.',
+  'Weil ich jeden Vorwand nutzen will, um Zeit mit dir zu verbringen.'
+];
+let reasonIdx = 0;
+const seenReasons = new Set();
+let reasonsPingSent = false;
+
+function initReasons(){
+  reasonIdx = 0;
+  renderReason();
+}
+function renderReason(){
+  $('reason-text').textContent = REASONS[reasonIdx];
+  const dots = $('reason-dots');
+  dots.innerHTML = '';
+  REASONS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'reason-dot' + (seenReasons.has(i) ? ' on' : '');
+    dots.appendChild(d);
+  });
+  $('reason-next').textContent = (reasonIdx === REASONS.length - 1) ? 'Zum Datum ➜' : 'Weiter ➜';
+}
+$('reason-next').addEventListener('click', () => {
+  seenReasons.add(reasonIdx);
+  if (reasonIdx < REASONS.length - 1){
+    reasonIdx++;
+    renderReason();
+    return;
+  }
+  if (!reasonsPingSent && seenReasons.size === REASONS.length){
+    reasonsPingSent = true;
+    sendTelegram('💌 <b>Sie hat alle 5 Gründe gelesen!</b> Jemand sitzt gerade ganz still da und denkt nach… 😌');
+  }
   showView('view-calendar');
   renderCalendar();
-  sendTelegram('🌹 <b>Jemand hat gerade JA gedrückt!</b>\n Und jetzt wird ein Date ausgewählt… 😍');
+});
+$('reason-skip').addEventListener('click', () => {
+  showView('view-calendar');
+  renderCalendar();
 });
 
 /* Herz-Spray: Herzen sprühen von einem Punkt nach allen Richtungen */
@@ -1241,6 +1470,8 @@ $('to-final').addEventListener('click', () => {
   $('final-when').textContent = dateStr;
   $('final-hour').textContent = state.time + ' Uhr';
   $('final-what').textContent = state.activity;
+  $('row-venue').style.display = DATE_VENUE.name ? '' : 'none';
+  $('final-venue').textContent = DATE_VENUE.name || '';
   showView('view-final');
   startConfetti();
   burstFireworks(6);
@@ -1249,8 +1480,9 @@ $('to-final').addEventListener('click', () => {
     '💌 <b>Liebe ' + name + '</b>\n\n' +
     '📅 ' + dateStr + '\n' +
     '🕐 ' + state.time + ' Uhr\n' +
-    '✨ ' + state.activity + '\n\n' +
-    'Das Date ist offiziell! 🥳'
+    '✨ ' + state.activity + '\n' +
+    (DATE_VENUE.name ? '📍 ' + DATE_VENUE.name + '\n' : '') +
+    '\nDas Date ist offiziell! 🥳'
   );
 });
 
@@ -1315,6 +1547,7 @@ async function saveLetterImage(){
       ['STUNDE', $('final-hour').textContent],
       ['WIR TUN', $('final-what').textContent],
     ];
+    if (DATE_VENUE.name) rows.push(['ORT', DATE_VENUE.name]);
     let y = 262;
     for (const [label, value] of rows){
       ctx.textAlign = 'left';
@@ -1402,10 +1635,17 @@ function saveToCalendar(){
       'DTEND:' + fmt(end),
       'SUMMARY:' + esc('Date mit Jason 💘'),
       'DESCRIPTION:' + esc('Wir tun: ' + (state.activity || '') + '\n\nEine Einladung, die man nicht ablehnen kann 🌹'),
+      ...(DATE_VENUE.name ? ['LOCATION:' + esc(DATE_VENUE.name)] : []),
+      ...(DATE_VENUE.mapsUrl ? ['URL:' + DATE_VENUE.mapsUrl] : []),
       'BEGIN:VALARM',
       'TRIGGER:-PT24H',
       'ACTION:DISPLAY',
       'DESCRIPTION:' + esc('Morgen ist es so weit: Dein Date mit Jason 💘'),
+      'END:VALARM',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT1H',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:' + esc('In 1 Stunde geht es los: Dein Date mit Jason 🌹'),
       'END:VALARM',
       'END:VEVENT',
       'END:VCALENDAR',
